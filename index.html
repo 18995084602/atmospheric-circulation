@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>三维大气热力环流模拟系统</title>
+    <link rel="stylesheet" href="styles/main.css">
+</head>
+<body>
+    <div id="app">
+        <!-- 顶部标题栏 -->
+        <header class="header">
+            <h1>三维大气热力环流模拟系统</h1>
+            <div class="subtitle">高中地理必修一 · 大气热力环流</div>
+        </header>
+
+        <!-- 主界面布局 -->
+        <main class="main-container">
+            <!-- 左侧控制面板 -->
+            <aside class="control-panel">
+                <!-- 模拟控制 -->
+                <section class="control-section">
+                    <h3>模拟控制</h3>
+                    <div class="control-group">
+                        <button id="playBtn" class="btn primary">开始模拟</button>
+                        <button id="pauseBtn" class="btn secondary">暂停</button>
+                        <button id="resetBtn" class="btn tertiary">重置</button>
+                    </div>
+                    <div class="control-group">
+                        <label>模拟速度</label>
+                        <input type="range" id="speedSlider" min="0.1" max="3" step="0.1" value="1">
+                        <span id="speedValue">1x</span>
+                    </div>
+                </section>
+
+                <!-- 热源控制 -->
+                <section class="control-section">
+                    <h3>热源设置</h3>
+                    <div class="control-group">
+                        <label>热源强度</label>
+                        <input type="range" id="heatIntensity" min="0" max="100" value="80">
+                        <span id="heatValue">80%</span>
+                    </div>
+                    <div class="control-group">
+                        <label>冷源强度</label>
+                        <input type="range" id="coldIntensity" min="0" max="100" value="60">
+                        <span id="coldValue">60%</span>
+                    </div>
+                </section>
+
+                <!-- 视角控制 -->
+                <section class="control-section">
+                    <h3>视角切换</h3>
+                    <div class="control-group">
+                        <button id="frontView" class="btn view-btn">正视图</button>
+                        <button id="sideView" class="btn view-btn">侧视图</button>
+                        <button id="topView" class="btn view-btn">俯视图</button>
+                        <button id="freeView" class="btn view-btn active">自由视角</button>
+                    </div>
+                </section>
+
+                <!-- 可视化图层 -->
+                <section class="control-section">
+                    <h3>可视化选项</h3>
+                    <div class="control-group">
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="showAxes" checked>
+                            <span>显示坐标轴</span>
+                        </label>
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="showPressure" checked>
+                            <span>显示等压面</span>
+                        </label>
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="showTemperature" checked>
+                            <span>显示温度分布</span>
+                        </label>
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="showWind" checked>
+                            <span>显示风向箭头</span>
+                        </label>
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="showParticles" checked>
+                            <span>显示气流粒子</span>
+                        </label>
+                    </div>
+                </section>
+
+                <!-- 教学辅助 -->
+                <section class="control-section">
+                    <h3>教学辅助</h3>
+                    <div class="control-group">
+                        <button id="stepMode" class="btn">分步演示</button>
+                        <button id="quizMode" class="btn">知识测验</button>
+                    </div>
+                    <div id="stepGuide" class="step-guide" style="display: none;">
+                        <div class="step-content">
+                            <h4>步骤 <span id="currentStep">1</span>/5</h4>
+                            <p id="stepDescription">正在加载...</p>
+                            <button id="nextStep" class="btn small">下一步</button>
+                        </div>
+                    </div>
+                </section>
+            </aside>
+
+            <!-- 中央3D场景 -->
+            <div class="scene-container">
+                <canvas id="threeScene"></canvas>
+                <div class="scene-info">
+                    <div class="info-item">
+                        <span>粒子数量：</span>
+                        <span id="particleCount">1000</span>
+                    </div>
+                    <div class="info-item">
+                        <span>当前视角：</span>
+                        <span id="currentView">自由视角</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 右侧知识面板 -->
+            <aside class="knowledge-panel">
+                <section class="knowledge-section">
+                    <h3>核心知识点</h3>
+                    <div class="knowledge-content">
+                        <div class="knowledge-item">
+                            <h4>热力环流原理</h4>
+                            <p>地表冷热不均 → 空气垂直运动 → 气压差异 → 水平气流 → 形成环流</p>
+                        </div>
+                        <div class="knowledge-item">
+                            <h4>关键概念</h4>
+                            <ul>
+                                <li><strong>热胀冷缩：</strong>热空气膨胀上升，冷空气收缩下沉</li>
+                                <li><strong>气压梯度力：</strong>从高压指向低压的力</li>
+                                <li><strong>环流平衡：</strong>垂直运动与水平运动形成闭合环流</li>
+                            </ul>
+                        </div>
+                        <div class="knowledge-item">
+                            <h4>实际应用</h4>
+                            <p>理解海陆风、山谷风、城市热岛环流等现象</p>
+                        </div>
+                    </div>
+                </section>
+
+                <section class="knowledge-section">
+                    <h3>实时数据</h3>
+                    <div class="data-display">
+                        <div class="data-item">
+                            <span>热源中心温度：</span>
+                            <span id="hotTemp" class="temp-hot">35°C</span>
+                        </div>
+                        <div class="data-item">
+                            <span>冷源中心温度：</span>
+                            <span id="coldTemp" class="temp-cold">5°C</span>
+                        </div>
+                        <div class="data-item">
+                            <span>最大风速：</span>
+                            <span id="maxWindSpeed">12 m/s</span>
+                        </div>
+                    </div>
+                </section>
+            </aside>
+        </main>
+    </div>
+
+    <!-- 测验模态框 -->
+    <div id="quizModal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2>热力环流知识测验</h2>
+            <div id="quizContent">
+                <!-- 测验内容将通过JavaScript动态生成 -->
+            </div>
+        </div>
+    </div>
+
+    <!-- 加载脚本 -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/dat-gui/0.7.9/dat.gui.min.js"></script>
+    <script src="js/AtmosphereSimulation.js?v=20241215"></script>
+    <script src="js/ThermalSystem.js?v=20241215"></script>
+    <script src="js/ParticleSystem.js?v=20241215"></script>
+    <script src="js/Visualization.js?v=20241215"></script>
+    <script src="js/EducationSystem.js?v=20241215"></script>
+    <script src="js/main.js?v=20241215"></script>
+</body>
+</html>
